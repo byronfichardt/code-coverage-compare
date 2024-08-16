@@ -1,18 +1,30 @@
-name: 'Compare Code Coverage'
-description: 'Compares code coverage between the current branch and a target branch using PCOV or Xdebug.'
-author: 'Your Name'
+name: 'Code Coverage Compare'
+description: 'Compares code coverage between the current branch and a specified compare branch using PCOV or Xdebug, and comments the results on the PR.'
+author: 'Byron Fichardt'
 inputs:
   coverage-tool:
     description: 'The code coverage tool to use (pcov or xdebug).'
     required: false
     default: 'pcov'
-  target-branch:
+  compare-branch:
     description: 'The branch to compare against (default is HEAD).'
     required: false
     default: 'HEAD'
 runs:
   using: 'composite'
   steps:
-    - name: Run the code coverage comparison
+    - name: Run the coverage comparison
       shell: bash
-      run: ./entrypoint.sh ${{ inputs.coverage-tool }} ${{ inputs.target-branch }}
+      run: ./entrypoint.sh ${{ inputs.coverage-tool }} ${{ inputs.compare-branch }}
+    - name: Post coverage results as a PR comment
+      if: github.event_name == 'pull_request'
+      uses: thollander/actions-comment-pull-request@v1
+      with:
+        message: |
+          ### Code Coverage Results
+          **Branch Coverage:** ${{ env.BRANCH_COVERAGE }}%
+          **Compare Branch Coverage:** ${{ env.COMPARE_COVERAGE }}%
+
+          ${{ env.status_message }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
