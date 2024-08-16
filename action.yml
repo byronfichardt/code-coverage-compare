@@ -1,5 +1,5 @@
 name: 'Code Coverage Compare'
-description: 'Compares code coverage between the current branch and a specified compare branch using PCOV or Xdebug, and comments the results on the PR.'
+description: 'Compares code coverage between the current branch and a specified compare branch using PCOV or Xdebug.'
 author: 'Byron Fichardt'
 inputs:
   coverage-tool:
