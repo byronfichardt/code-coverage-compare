@@ -28,3 +28,6 @@ runs:
           ${{ env.status_message }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+branding:
+  icon: 'shield'
+  color: 'green'
