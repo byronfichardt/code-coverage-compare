@@ -49,7 +49,7 @@ elif [ "$COVERAGE_TOOL" = "xdebug" ]; then
 fi
 
 # Run tests and generate coverage for the target branch
-./vendor/bin/phpunit -d memory_limit=512M --coverage-clover=coverage-dev.xml
+./vendor/bin/phpunit -d memory_limit=512M --coverage-clover=coverage-compare.xml
 
 # Compare code coverage
 echo "Coverage comparison started at $(date)"
@@ -60,8 +60,8 @@ if [ ! -f coverage.xml ]; then
   exit 1
 fi
 
-if [ ! -f coverage-dev.xml ]; then
-  echo "Error: 'coverage-dev.xml' file is missing."
+if [ ! -f coverage-compare.xml ]; then
+  echo "Error: 'coverage-compare.xml' file is missing."
   exit 1
 fi
 
@@ -69,36 +69,36 @@ fi
 BRANCH_TOTAL_STATEMENTS=$(awk -F'"' '/<metrics/ {total+=$12} END {print total}' coverage.xml)
 BRANCH_COVERED_STATEMENTS=$(awk -F'"' '/<metrics/ {covered+=$14} END {print covered}' coverage.xml)
 
-# Extract total and covered statements for the dev branch
-DEV_TOTAL_STATEMENTS=$(awk -F'"' '/<metrics/ {total+=$12} END {print total}' coverage-dev.xml)
-DEV_COVERED_STATEMENTS=$(awk -F'"' '/<metrics/ {covered+=$14} END {print covered}' coverage-dev.xml)
+# Extract total and covered statements for the compare branch
+COMPARE_TOTAL_STATEMENTS=$(awk -F'"' '/<metrics/ {total+=$12} END {print total}' coverage-compare.xml)
+COMPARE_COVERED_STATEMENTS=$(awk -F'"' '/<metrics/ {covered+=$14} END {print covered}' coverage-compare.xml)
 
-if [ "$BRANCH_TOTAL_STATEMENTS" -eq 0 ] || [ "$DEV_TOTAL_STATEMENTS" -eq 0 ]; then
+if [ "$BRANCH_TOTAL_STATEMENTS" -eq 0 ] || [ "$COMPARE_TOTAL_STATEMENTS" -eq 0 ]; then
   echo "Error: One or more total statement counts are zero, cannot calculate coverage."
   exit 1
 fi
 
 # Calculate overall coverage percentages
 BRANCH_COVERAGE=$(echo "scale=2; ($BRANCH_COVERED_STATEMENTS/$BRANCH_TOTAL_STATEMENTS)*100" | bc -l)
-DEV_COVERAGE=$(echo "scale=2; ($DEV_COVERED_STATEMENTS/$DEV_TOTAL_STATEMENTS)*100" | bc -l)
+COMPARE_COVERAGE=$(echo "scale=2; ($COMPARE_COVERED_STATEMENTS/$COMPARE_TOTAL_STATEMENTS)*100" | bc -l)
 
 if [ -z "$BRANCH_COVERAGE" ]; then
   echo "Error: Failed to calculate branch coverage."
   exit 1
 fi
 
-if [ -z "$DEV_COVERAGE" ]; then
-  echo "Error: Failed to calculate development branch coverage."
+if [ -z "$COMPARE_COVERAGE" ]; then
+  echo "Error: Failed to calculate compare branch coverage."
   exit 1
 fi
 
 # Output the results
 echo "Branch Coverage: ${BRANCH_COVERAGE:-Not Found}%"
-echo "Development Branch Coverage: ${DEV_COVERAGE:-Not Found}%"
+echo "Compare Branch Coverage: ${COMPARE_COVERAGE:-Not Found}%"
 
 # Compare the coverage values
-if (( $(echo "$BRANCH_COVERAGE < $DEV_COVERAGE" | bc -l) )); then
-  echo "Coverage decreased compared to development branch!"
+if (( $(echo "$BRANCH_COVERAGE < $COMPARE_COVERAGE" | bc -l) )); then
+  echo "Coverage decreased compared to compare branch!"
   exit 1
 else
   echo "Coverage is OK or improved!"

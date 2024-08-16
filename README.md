@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Compare Code Coverage
-        uses: your-username/compare-code-coverage@v1
+        uses: byronfichardt/code-coverage-compare@v1
         with:
           coverage-tool: 'xdebug'
           target-branch: 'development'
