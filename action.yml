@@ -15,7 +15,7 @@ runs:
   steps:
     - name: Run the coverage comparison
       shell: bash
-      run: "${{ github.action_path }}/entrypoint.sh" ${{ inputs.coverage-tool }} ${{ inputs.compare-branch }}
+      run: "${{ github.action_path }}/entrypoint.sh ${{ inputs.coverage-tool }} ${{ inputs.compare-branch }}"
     - name: Post coverage results as a PR comment
       if: github.event_name == 'pull_request'
       uses: thollander/actions-comment-pull-request@v1
