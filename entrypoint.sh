@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Navigate to the GitHub workspace root directory (where the main repo is checked out)
+cd "${GITHUB_WORKSPACE}"
+
 # Get input parameters from action.yml
 COVERAGE_TOOL=$1
 COMPARE_BRANCH=$2
