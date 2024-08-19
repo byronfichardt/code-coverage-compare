@@ -13,6 +13,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Checkout action
+      uses: actions/checkout@v4
     - name: Run the coverage comparison
       shell: bash
       run: ./entrypoint.sh ${{ inputs.coverage-tool }} ${{ inputs.compare-branch }}
