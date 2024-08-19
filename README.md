@@ -31,6 +31,8 @@ jobs:
 
       - name: Compare Code Coverage
         uses: byronfichardt/code-coverage-compare@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           coverage-tool: 'xdebug'
           target-branch: 'development'
