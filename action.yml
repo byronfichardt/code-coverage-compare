@@ -10,15 +10,19 @@ inputs:
     description: 'The branch to compare against (default is HEAD).'
     required: false
     default: 'HEAD'
+  phpunit-path:
+    description: 'Path to the phpunit executable (default is vendor/bin/phpunit).'
+    required: false
+    default: 'vendor/bin/phpunit'
 runs:
   using: 'composite'
   steps:
     - name: Run the coverage comparison
       shell: bash
-      run: "${{ github.action_path }}/entrypoint.sh ${{ inputs.coverage-tool }} ${{ inputs.compare-branch }}"
+      run: "${{ github.action_path }}/entrypoint.sh ${{ inputs.coverage-tool }} ${{ inputs.compare-branch }} ${{ inputs.phpunit-path }}"
     - name: Post coverage results as a PR comment
       if: github.event_name == 'pull_request'
-      uses: thollander/actions-comment-pull-request@v1
+      uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
           ### Code Coverage Results

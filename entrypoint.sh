@@ -7,6 +7,7 @@ cd "${GITHUB_WORKSPACE}"
 # Get input parameters from action.yml
 COVERAGE_TOOL=$1
 COMPARE_BRANCH=$2
+PHPUNIT_PATH=$3
 
 # Default to PCOV if no tool is specified
 if [ -z "$COVERAGE_TOOL" ]; then
@@ -16,6 +17,11 @@ fi
 # Default to HEAD if no branch is specified
 if [ -z "$COMPARE_BRANCH" ]; then
   COMPARE_BRANCH="HEAD"
+fi
+
+# Default to vendor/bin/phpunit if no path is specified
+if [ -z "$PHPUNIT_PATH" ]; then
+  PHPUNIT_PATH="vendor/bin/phpunit"
 fi
 
 # Enable the selected coverage tool
@@ -32,11 +38,18 @@ else
 fi
 
 # Run tests and generate coverage for the current branch
-./vendor/bin/phpunit -d memory_limit=512M --coverage-clover=coverage.xml
+./$PHPUNIT_PATH -d memory_limit=512M --coverage-clover=coverage.xml
+
+# Save coverage report before switching branches
+cp coverage.xml /tmp/branch-coverage.xml
 
 # Fetch and checkout the compare branch
 git fetch origin $COMPARE_BRANCH:$COMPARE_BRANCH
 git checkout $COMPARE_BRANCH
+
+# Clean untracked files left over from the PR branch (e.g., new source files,
+# caches, generated files) that could cause test failures on the compare branch.
+git clean -fd
 
 # Install dependencies for the compare branch
 composer install --no-ansi --no-interaction --no-progress --prefer-dist
@@ -52,7 +65,10 @@ elif [ "$COVERAGE_TOOL" = "xdebug" ]; then
 fi
 
 # Run tests and generate coverage for the compare branch
-./vendor/bin/phpunit -d memory_limit=512M --coverage-clover=coverage-compare.xml
+./$PHPUNIT_PATH -d memory_limit=512M --coverage-clover=coverage-compare.xml
+
+# Restore the current branch coverage report
+cp /tmp/branch-coverage.xml coverage.xml
 
 # Compare code coverage
 echo "Coverage comparison started at $(date)"
